@@ -153,7 +153,7 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
 			    lcdd.material(xSteelSupport.materialStr()));
   steelSupportVolume.setVisAttributes(lcdd.invisible());
   PlacedVolume placedSupport = envelopeVolume.placeVolume(steelSupportVolume);
-  DetElement support(hCal, "support", 0);
+  DetElement support(hCal, "HCalSteelSupport", 0);
   support.setPlacement(placedSupport);
 
 
