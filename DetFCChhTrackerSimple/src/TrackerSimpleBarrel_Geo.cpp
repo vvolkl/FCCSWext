@@ -36,12 +36,15 @@ static dd4hep::Ref_t createSimpleTrackerBarrel(dd4hep::Detector& lcdd,
   dd4hep::xml::Component xLayers = xmlElement.child(_Unicode(layers));
   for (dd4hep::xml::Collection_t xLayerColl(xLayers, _U(layer)); nullptr != xLayerColl; ++xLayerColl) {
     dd4hep::xml::Component xLayer = static_cast<dd4hep::xml::Component>(xLayerColl);
-    std::cout << "building layer at " << xLayer.rmin() << std::endl;
     //dd4hep::Tube layerShape(xLayer.rmin(), xLayer.rmax(), dimensions.zmax());
     dd4hep::Tube layerShape(xLayer.rmin(), xLayer.rmin()+0.1, dimensions.zmax());
     Volume layerVolume("layer", layerShape, lcdd.material("Air"));
     layerVolume.setSensitiveDetector(sensDet);
-    layerVolume.setVisAttributes(lcdd, dimensions.visStr());
+    if (layerCounter % 2 == 0) {
+      layerVolume.setVisAttributes(lcdd, "trk_layer_vis");
+    } else {
+      layerVolume.setVisAttributes(lcdd, "trk_layer_vis2");
+    }
     PlacedVolume placedLayerVolume = topVolume.placeVolume(layerVolume);
     placedLayerVolume.addPhysVolID("layer", layerCounter);
     //DetElement lay_det(topDetElement, "layer" + std::to_string(layerCounter), layerCounter);

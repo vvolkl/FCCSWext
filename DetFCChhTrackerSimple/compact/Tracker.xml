@@ -3,6 +3,51 @@
     <info name="TkLayoutTracker" title="TkLayoutTracker" author="Z.Drasal" url="http://fcc-tklayout.web.cern.ch/fcc-tklayout" status="optimization" version="FCChh_v3.03">
         <comment>The tracker geometry as designed and optimized by tkLayout software - design version: FCChh_v3.03</comment>
     </info>
+  <define>
+    <constant name="world_size" value="10*m"/>
+    <constant name="world_x" value="world_size"/>
+    <constant name="world_y" value="world_size"/>
+    <constant name="world_z" value="world_size"/>
+    <!-- TRACKER DIMENSIONS -->
+    <constant name="Tracker_rmin" value="23.28*mm"/>
+    <constant name="Tracker_rmax" value="1700*mm"/>
+    <constant name="Tracker_dz" value="5009.7*mm"/>
+    <!-- Tracker Barrel -->
+    <constant name="BarTrackerInner_id" value="0"/>
+    <constant name="BarTrackerOuter_id" value="1"/>
+    <!-- not explicitly defined, up to tracker design -->
+
+    <!-- Tracker End-caps -->
+    <constant name="EndCapTrackerInner_id" value="2"/>
+    <constant name="EndCapTrackerOuter_id" value="3"/>
+    <!-- Tracker Forward -->
+    <constant name="FwdTracker_id" value="4"/>
+    <!-- single layer close to ExCal -->
+    <constant name="FwdTracker_rmin1" value="40*mm"/>
+    <constant name="FwdTracker_rmax1" value="1076.8*mm"/>
+    <constant name="FwdTracker_zOffset1" value="7500*mm"/>
+    <!-- the rest of the tracking layers inside the forward solenoid / shielding -->
+    <constant name="FwdTracker_rmin2" value="60*mm"/>
+    <constant name="FwdTracker_rmax2" value="1549.8*mm"/>
+    <constant name="FwdTracker_z2" value="3009.65*mm"/>
+    <constant name="FwdTracker_zOffset2" value="10*m + FwdTracker_z2"/>
+
+  </define>
+    <materials>
+
+      <material name="Air">
+        <D type="density" unit="g/cm3" value="0.0012"/>
+        <fraction n="0.754" ref="N"/>
+        <fraction n="0.234" ref="O"/>
+        <fraction n="0.012" ref="Ar"/>
+      </material>
+
+      <material name="Vacuum">
+        <D type="density" unit="g/cm3" value="0.00000001" />
+        <fraction n="1" ref="H" />
+      </material>
+
+    </materials>
     <readouts>
         <readout name="TrackerBarrelReadout">
             <segmentation type="CartesianGridXZ" grid_size_x="0.005*m" grid_size_z="0.010*m"/>
@@ -14,14 +59,13 @@
         </readout>
     </readouts>
   <display>
-    <vis name="trk_layer_vis" r="0.1" g="0.2" b="0.6" alpha="1" showDaughers="false" visible="true" />
+    <vis name="trk_layer_vis" r="0.1" g="0.2" b="0.6" alpha="0.4" showDaughers="false" visible="true" />
+    <vis name="trk_layer_vis2" r="0.2" g="0.4" b="0.9" alpha="0.4" showDaughers="false" visible="true" />
+    <vis name="trk_layer_vis3" r="0.7" g="0.9" b="0.7" alpha="0.5" showDaughers="false" visible="true" />
   </display>
 
     <include ref="FCChh_v3.03_Definitions.xml"/>
     <detectors>
-        <detector id="0" name="beampipe" type="BeamTube">
-            <dimensions rmin="CentralBeamTube_rmin" rmax="CentralBeamTube_rmax" z="CentralBeamTube_dz" material="Beryllium" vis="violet"/>
-        </detector>
         <detector id="101" name="FCChhInner" type="DD4hep_SubdetectorAssembly">
             <composite name="InnerBRL"/>
             <composite name="InnerECAP"/>
@@ -30,7 +74,7 @@
             <composite name="OuterBRL"/>
             <composite name="OuterECAP"/>
         </detector>
-        <detector id="103" name="FCChhFwdEcap" type="DD4hep_SubdetectorAssembly"`>
+        <detector id="103" name="FCChhFwdEcap" type="DD4hep_SubdetectorAssembly">
             <composite name="FwdECAP"/>
         </detector>
     </detectors>

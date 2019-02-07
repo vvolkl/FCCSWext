@@ -56,6 +56,7 @@ static dd4hep::Ref_t createSimpleTrackerEndcap(dd4hep::Detector& lcdd,
 
       discVolumeVec.emplace_back("disc", discShape, lcdd.air());
       discVolumeVec.back().setSensitiveDetector(sensDet);
+      discVolumeVec.back().setVisAttributes(lcdd, "trk_layer_vis3");
       discDetElementVec.emplace_back(posEcapDetElement, "disc" + std::to_string(discCounter), discCounter);
     } else {
       discDetElementVec.emplace_back(discDetElementVec.back().clone("disc" + std::to_string(discCounter)));
@@ -67,21 +68,6 @@ static dd4hep::Ref_t createSimpleTrackerEndcap(dd4hep::Detector& lcdd,
 
     discDetElementVec.back().setPlacement(placedDiscVolume);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   dd4hep::Assembly bothEndcaps("bothEndcapsEnvelope");
