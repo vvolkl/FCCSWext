@@ -163,13 +163,14 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
   std::vector<std::vector<dd4hep::PlacedVolume>> tilesInLayers;
   tilesInLayers.reserve(numSequencesZ*sequences.size());
   
-  double layerR = 0.;
 
 
   //double sensitiveBarrelRMax = 
   //          sensitiveBarrelRmin + std::accumulate(layerDepths.begin(), layerDepths.end(), 0.0);
+  double sensitiveBarrelDz = (dzDetector - dZEndPlate - space);
 
 
+  double layerR = 0.;
   for (unsigned int idxLayer = 0; idxLayer < layerDepths.size(); ++idxLayer) {
     std::string layerName = "HCalLayer" + std::to_string(idxLayer);
 
@@ -184,18 +185,18 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
     dd4hep::Tube tileSequenceShape(rminLayer, rmaxLayer, dzSequence);
     Volume tileSequenceVolume("HCalTileSequenceVol", tileSequenceShape, lcdd.air());
 
-    lLog << MSG::DEBUG << "layer inner radius:  " << rminLayer << "[cm]" << endmsg;
-    lLog << MSG::DEBUG << "layer outer radius:  " << rmaxLayer << "[cm]" <<  endmsg;
+    lLog << MSG::DEBUG << "layer inner radius:  " << rminLayer << " [cm]" << endmsg;
+    lLog << MSG::DEBUG << "layer outer radius:  " << rmaxLayer << " [cm]" <<  endmsg;
     
 
-    dd4hep::Tube layerShape(rminLayer, rmaxLayer, (dzDetector - dZEndPlate - space));
+    dd4hep::Tube layerShape(rminLayer, rmaxLayer, sensitiveBarrelDz );
     Volume layerVolume("HCalLayerVol", layerShape, lcdd.air());
 
     
     layerVolume.setVisAttributes(lcdd.invisible());
     unsigned int idxSubMod = 0;
     unsigned int idxActMod = 0;
-    double modCompZOffset = - (dzDetector - dZEndPlate - space);
+    double tileZOffset = - dzSequence;
     
 
     layers.push_back(envelopeVolume.placeVolume(layerVolume));
@@ -214,24 +215,30 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
             lcdd.material(xComp.materialStr()));
       tileVol.setVisAttributes(lcdd, xComp.visStr());
       
-      dd4hep::Position offset(0, 0, modCompZOffset + dyComp);
+      dd4hep::Position tileOffset(0, 0, tileZOffset + dyComp);
       
       if (xComp.isSensitive()) {
         tileVol.setSensitiveDetector(sensDet);
-        tiles.push_back(layerVolume.placeVolume(tileVol, offset));
+        tiles.push_back(tileSequenceVolume.placeVolume(tileVol, tileOffset));
        // tiles.back().addPhysVolID("row", numSeq);
         idxActMod++;
       } else {
-        tiles.push_back(layerVolume.placeVolume(tileVol, offset));
+        tiles.push_back(tileSequenceVolume.placeVolume(tileVol, tileOffset));
       }
-      modCompZOffset += xComp.thickness();
+      tileZOffset += xComp.thickness();
       }
 
     // Filling of the layer tube with tile rings in full z
-    for (uint numSeq=0; numSeq<numSequencesZ; numSeq++){
+    double tileSequenceZOffset = -sensitiveBarrelDz;
+    for (uint numSeq=0; numSeq < numSequencesZ; numSeq++){
+      dd4hep::Position tileSequencePosition(0, 0, tileSequenceZOffset + dzSequence * 0.5);
+      layerVolume.placeVolume(tileSequenceVolume, tileSequencePosition);
+      
+      tileSequenceZOffset += dzSequence;
     }
     // Fill vector for DetElements
     tilesInLayers.push_back(tiles);
+
   }
 
   

@@ -54,7 +54,7 @@
     <constant name="BarHCal_id" value="8"/>
     <constant name="BarHCal_rmin" value="2850*mm"/>
     <constant name="BarHCal_rmax" value="4890*mm"/>
-    <constant name="BarHCal_dz" value="50*mm"/>
+    <constant name="BarHCal_dz" value="4600*mm"/>
 
 
   </define>

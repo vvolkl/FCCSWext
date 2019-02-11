@@ -8,6 +8,7 @@ void count_vol() {
   int numberOfPlacedVolumes = 0;
   TGeoVolume* v = t->GetCurrentVolume();
   TGeoNode* node;
+  TGeoNode* mynode;
   TGeoIterator next(v);
     TString s;
   while ((node = next())) {
@@ -15,12 +16,18 @@ void count_vol() {
     
     next.GetPath(s);
     cout << s << endl;
+    if (s == "world_volume/HCalEnvelopeVolume_0/HCalLayerVol_4/HCalTileSequenceVol_13" ) {
+      mynode = node;
+    }
     //if (currentNodeName.find("component") != std::string::npos) {
       ++numberOfPlacedVolumes;
     //}
   }
 	std::cout << numberOfPlacedVolumes << std::endl;
-  gApplication->Terminate();
+  //gApplication->Terminate();
+  TGeoVolume* myVol = mynode->GetVolume();
+  myVol->SetVisibility(true);
+  myVol->Draw("ogl");
 
 
 }
