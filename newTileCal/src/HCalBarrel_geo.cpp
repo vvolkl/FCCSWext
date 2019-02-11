@@ -166,64 +166,69 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
   double layerR = 0.;
 
 
-  double sensitiveBarrelRMax = 
-            sensitiveBarrelRmin + std::accumulate(layerDepths.begin(), layerDepths.end(), 0.0);
+  //double sensitiveBarrelRMax = 
+  //          sensitiveBarrelRmin + std::accumulate(layerDepths.begin(), layerDepths.end(), 0.0);
+
 
   for (unsigned int idxLayer = 0; idxLayer < layerDepths.size(); ++idxLayer) {
     std::string layerName = "HCalLayer" + std::to_string(idxLayer);
-    unsigned int sequenceIdx = idxLayer % 2;
 
     // in Module rmin = 0  for first wedge, changed radius to the full radius starting at (0,0,0)
     double rminLayer = sensitiveBarrelRmin + layerR;
     double rmaxLayer = sensitiveBarrelRmin + layerR + layerDepths.at(idxLayer);
+    layerR += layerDepths.at(idxLayer);
+
+    //alternate: even layers consist of tile sequence b, odd layer of tile sequence a
+    unsigned int sequenceIdx = (idxLayer + 1) % 2;
+    
+    dd4hep::Tube tileSequenceShape(rminLayer, rmaxLayer, dzSequence);
+    Volume tileSequenceVolume("HCalTileSequenceVol", tileSequenceShape, lcdd.air());
+
     lLog << MSG::DEBUG << "layer inner radius:  " << rminLayer << "[cm]" << endmsg;
     lLog << MSG::DEBUG << "layer outer radius:  " << rmaxLayer << "[cm]" <<  endmsg;
     
-    layerR += layerDepths.at(idxLayer);
 
     dd4hep::Tube layerShape(rminLayer, rmaxLayer, (dzDetector - dZEndPlate - space));
-    Volume layerVolume("HCalLayerVol", layerShape, lcdd.material("Air"));
+    Volume layerVolume("HCalLayerVol", layerShape, lcdd.air());
+
     
     layerVolume.setVisAttributes(lcdd.invisible());
     unsigned int idxSubMod = 0;
     unsigned int idxActMod = 0;
     double modCompZOffset = - (dzDetector - dZEndPlate - space);
     
-    // this matches the order of sequences of standalone HCAL geo description
-    if (sequenceIdx == 0) {
-      sequenceIdx = 1;
-    } else {
-      sequenceIdx = 0;
-    }
 
     layers.push_back(envelopeVolume.placeVolume(layerVolume));
     layers.back().addPhysVolID("layer", idxLayer);
    
     std::vector<dd4hep::PlacedVolume> tiles;
-    // Filling of the layer tube with tile tubes in full z
-    for (uint numSeq=0; numSeq<numSequencesZ; numSeq++){
-      for (xml_coll_t xCompColl(sequences[sequenceIdx], _Unicode(module_component)); xCompColl;
-	   ++xCompColl, ++idxSubMod) {
-	xml_comp_t xComp = xCompColl;
-	double dyComp = xComp.thickness() * 0.5;
-	dd4hep::Tube tileShape(rminLayer, rmaxLayer, dyComp);
-	
-	Volume modCompVol("modCompVolume", tileShape,
-			  lcdd.material(xComp.materialStr()));
-	modCompVol.setVisAttributes(lcdd, xComp.visStr());
-	
-	dd4hep::Position offset(0, 0, modCompZOffset + dyComp);
-	
-	if (xComp.isSensitive()) {
-	  modCompVol.setSensitiveDetector(sensDet);
-	  tiles.push_back(layerVolume.placeVolume(modCompVol, offset));
-	  tiles.back().addPhysVolID("row", numSeq);
-	  idxActMod++;
-	} else {
-	  tiles.push_back(layerVolume.placeVolume(modCompVol, offset));
-	}
-	modCompZOffset += xComp.thickness();
+
+    
+    for (xml_coll_t xCompColl(sequences[sequenceIdx], _Unicode(module_component)); xCompColl;
+	        ++xCompColl, ++idxSubMod) {
+      xml_comp_t xComp = xCompColl;
+      double dyComp = xComp.thickness() * 0.5;
+      dd4hep::Tube tileShape(rminLayer, rmaxLayer, dyComp);
+      
+      Volume tileVol("tileVolume", tileShape,
+            lcdd.material(xComp.materialStr()));
+      tileVol.setVisAttributes(lcdd, xComp.visStr());
+      
+      dd4hep::Position offset(0, 0, modCompZOffset + dyComp);
+      
+      if (xComp.isSensitive()) {
+        tileVol.setSensitiveDetector(sensDet);
+        tiles.push_back(layerVolume.placeVolume(tileVol, offset));
+       // tiles.back().addPhysVolID("row", numSeq);
+        idxActMod++;
+      } else {
+        tiles.push_back(layerVolume.placeVolume(tileVol, offset));
       }
+      modCompZOffset += xComp.thickness();
+      }
+
+    // Filling of the layer tube with tile rings in full z
+    for (uint numSeq=0; numSeq<numSequencesZ; numSeq++){
     }
     // Fill vector for DetElements
     tilesInLayers.push_back(tiles);
