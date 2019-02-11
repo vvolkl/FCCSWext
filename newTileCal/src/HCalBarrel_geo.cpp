@@ -165,7 +165,10 @@ static dd4hep::Ref_t createHCal(dd4hep::Detector& lcdd, xml_det_t xmlDet, dd4hep
   
   double layerR = 0.;
 
-  // Placement of subWedges in Wedge
+
+  double sensitiveBarrelRMax = 
+            sensitiveBarrelRmin + std::accumulate(layerDepths.begin(), layerDepths.end(), 0.0);
+
   for (unsigned int idxLayer = 0; idxLayer < layerDepths.size(); ++idxLayer) {
     std::string layerName = "HCalLayer" + std::to_string(idxLayer);
     unsigned int sequenceIdx = idxLayer % 2;
