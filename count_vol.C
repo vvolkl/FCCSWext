@@ -19,15 +19,17 @@ void count_vol() {
     if (s == "world_volume/HCalEnvelopeVolume_0/HCalLayerVol_4/HCalTileSequenceVol_13" ) {
       mynode = node;
     }
-    //if (currentNodeName.find("component") != std::string::npos) {
+    // add filter if required
+    //if (currentNodeName.find("component") != std::string::npos) 
       ++numberOfPlacedVolumes;
-    //}
   }
 	std::cout << numberOfPlacedVolumes << std::endl;
-  //gApplication->Terminate();
-  TGeoVolume* myVol = mynode->GetVolume();
-  myVol->SetVisibility(true);
-  myVol->Draw("ogl");
+  gApplication->Terminate();
+
+  
+  //TGeoVolume* myVol = mynode->GetVolume();
+  //myVol->SetVisibility(true);
+  //myVol->Draw("ogl");
 
 
 }
